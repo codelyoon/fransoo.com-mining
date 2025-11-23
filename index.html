@@ -25,7 +25,7 @@
 
 <div class="container">
   <div class="typing" id="typing"></div>
-  <h1 id="title">fransoo miners • solo.ckpool</h1>
+  <h1>fransoo miners • solo.ckpool</h1>
   
   <div class="stats" id="stats">Loading...</div>
 </div>
@@ -52,41 +52,24 @@ const statsEl = document.getElementById('stats');
 async function update(){
   statsEl.innerHTML = 'Loading...';
   
-  // MOCK DATA FOR TESTING (uncomment below to test without API)
-  /*
-  const data = {
-    "hashrate1m": "9.5T",
-    "workers": 2,
-    "worker": [
-      {
-        "workername": "bc1qn8m9aqsmgk2t7yjvvene4jzy5rj0h04ttesvcc.fransooL",
-        "hashrate1m": "4.73T",
-        "lastshare": Math.floor(Date.now() / 1000) - 120,
-        "shares": 2778806995,
-        "bestshare": 210690044.4203128
-      },
-      {
-        "workername": "bc1qn8m9aqsmgk2t7yjvvene4jzy5rj0h04ttesvcc.fransooR",
-        "hashrate1m": "4.91T",
-        "lastshare": Math.floor(Date.now() / 1000) - 45,
-        "shares": 2575948749,
-        "bestshare": 2666295200.523154
-      }
-    ]
-  };
-  displayData(data);
-  return;
-  */
-
   try{
+    // Fetch page as text
     const r = await fetch('https://solo.ckpool.org/users/bc1qn8m9aqsmgk2t7yjvvene4jzy5rj0h04ttesvcc',{cache:'no-store'});
     if (!r.ok) throw new Error(`HTTP ${r.status}`);
-    const data = await r.json();
-    if(!data || !data.worker) throw new Error('No worker data');
+    const text = await r.text();
+    
+    // Parse JSON from <pre> block
+    const jsonMatch = text.match(/<pre[^>]*>([\s\S]*?)<\/pre>/i);
+    if (!jsonMatch) throw new Error('No JSON data found');
+    const jsonStr = jsonMatch[1].trim();
+    const data = JSON.parse(jsonStr);
+    
+    if(!data || !data.worker || data.worker.length < 2) throw new Error('Invalid worker data');
+    
     displayData(data);
   }catch(e){
-    console.error('Fetch error:', e);
-    statsEl.innerHTML = `<span class="error">API Error - ${e.message}. Check console or URL in browser.</span>`;
+    console.error('Parse error:', e);
+    statsEl.innerHTML = `<span class="error">Parse Error: ${e.message}. Check console. (JSON: ${text ? 'Found but invalid' : 'Not found'})</span>`;
   }
 }
 
