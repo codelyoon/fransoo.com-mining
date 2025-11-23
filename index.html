@@ -14,7 +14,7 @@
   h1{font-size:clamp(32px,8vw,60px);margin:0 0 40px;color:#00bfff;text-shadow:0 0 20px #00bfff}
   .stats{font-size:clamp(20px,5vw,36px);line-height:1.8}
   .miner{margin:40px 0}
-  .label{color:#00ffff;display:inline-block;width:180px;text-align:right;margin-right:15px}
+  .label{color:#00ffff;display:inline-block;width:200px;text-align:right;margin-right:15px}
   .value{font-weight:bold;color:#0f8}
   .best{color:#0f0}
   .error{color:#f44}
@@ -26,72 +26,65 @@
 <div class="container">
   <div class="typing" id="typing"></div>
   <h1>fransoo miners • solo.ckpool</h1>
-  
   <div class="stats" id="stats">Loading...</div>
 </div>
 
 <script>
 // Static CRT noise
-const s=document.getElementById('static'),c=s.getContext('2d');
+const s=document.getElementById('static'),ctx=s.getContext('2d');
 s.width=innerWidth;s.height=innerHeight;
 window.addEventListener('resize',()=>{s.width=innerWidth;s.height=innerHeight});
-(function n(){const i=c.createImageData(s.width,s.height),d=new Uint32Array(i.data.buffer);
+(function n(){const i=ctx.createImageData(s.width,s.height),d=new Uint32Array(i.data.buffer);
 for(let j=0;j<d.length;j++)if(Math.random()<0.09)d[j]=0x33ffffff;
-c.putImageData(i,0,0);requestAnimationFrame(n)})();
+ctx.putImageData(i,0,0);requestAnimationFrame(n)})();
 
-// Typing animation
+// Typing
 const intro=`welcome to fransoo.com mining portal
 two bitaxe miners • live stats • solo.ckpool`;
 const typing=document.getElementById('typing');
 let i=0;
-const t=setInterval(()=>{if(i<intro.length){typing.innerHTML+=intro[i]==='\n'?'<br>':intro[i];i++}
-else{clearInterval(t);typing.innerHTML+='<span class="cursor"></span>'}},45);
+setInterval(()=>{if(i<intro.length){typing.innerHTML+=intro[i]==='\n'?'<br>':intro[i];i++}
+else{clearInterval(this);typing.innerHTML+='<span class="cursor"></span>'}},45);
 
 const statsEl = document.getElementById('stats');
 
+// CORS-free proxy (thanks cors-anywhere hero)
+const PROXY = 'https://api.allorigins.ml/proxy';
+
 async function update(){
   statsEl.innerHTML = 'Loading...';
-  
+
   try{
-    // Fetch page as text
-    const r = await fetch('https://solo.ckpool.org/users/bc1qn8m9aqsmgk2t7yjvvene4jzy5rj0h04ttesvcc',{cache:'no-store'});
-    if (!r.ok) throw new Error(`HTTP ${r.status}`);
-    const text = await r.text();
-    
-    // Parse JSON from <pre> block
-    const jsonMatch = text.match(/<pre[^>]*>([\s\S]*?)<\/pre>/i);
-    if (!jsonMatch) throw new Error('No JSON data found');
-    const jsonStr = jsonMatch[1].trim();
-    const data = JSON.parse(jsonStr);
-    
-    if(!data || !data.worker || data.worker.length < 2) throw new Error('Invalid worker data');
-    
-    displayData(data);
+    const response = await fetch(`${PROXY}?url=${encodeURIComponent('https://solo.ckpool.org/users/bc1qn8m9aqsmgk2t7yjvvene4jzy5rj0h04ttesvcc')}`);
+    const html = await response.text();
+
+    // Extract JSON from the <pre> tag
+    const preMatch = html.match(/<pre[^>]*>([\s\S]*?)<\/pre>/i);
+    if (!preMatch) throw new Error('No <pre> found');
+
+    const data = JSON.parse(preMatch[1]);
+
+    const now = Date.now() / 1000;
+    let htmlOut = `<div class="miner"><strong>L</strong> • ${data.worker[0].workername.split('.').pop()}<br>`;
+    htmlOut += `<span class="label">Hashrate 1m:</span> <span class="value">${data.worker[0].hashrate1m}</span><br>`;
+    htmlOut += `<span class="label">Last share:</span> <span class="value">${Math.floor((now - data.worker[0].lastshare)/60)} min ago</span><br>`;
+    htmlOut += `<span class="label">Best share:</span> <span class="best">${formatDiff(data.worker[0].bestshare)}</span><br></div>`;
+
+    htmlOut += `<div class="miner"><strong>R</strong> • ${data.worker[1].workername.split('.').pop()}<br>`;
+    htmlOut += `<span class="label">Hashrate 1m:</span> <span class="value">${data.worker[1].hashrate1m}</span><br>`;
+    htmlOut += `<span class="label">Last share:</span> <span class="value">${Math.floor((now - data.worker[1].lastshare)/60)} min ago</span><br>`;
+    htmlOut += `<span class="label">Best share:</span> <span class="best">${formatDiff(data.worker[1].bestshare)}</span><br></div>`;
+
+    htmlOut += `<div style="margin-top:50px;font-size:clamp(20px,5vw,32px);color:#00ffff">
+                 Total Hashrate: ${data.hashrate1m} • Workers online: ${data.workers}
+               </div>`;
+
+    statsEl.innerHTML = htmlOut;
+
   }catch(e){
-    console.error('Parse error:', e);
-    statsEl.innerHTML = `<span class="error">Parse Error: ${e.message}. Check console. (JSON: ${text ? 'Found but invalid' : 'Not found'})</span>`;
+    statsEl.innerHTML = `<span class="error">Failed to load data<br>Check internet or try later</span>`;
+    console.error(e);
   }
-}
-
-function displayData(data){
-  const now = Date.now() / 1000;
-  let html = `<div class="miner"><strong>L</strong> • ${data.worker[0].workername.split('.').pop()}<br>`;
-  html += `<span class="label">Hashrate 1m:</span> <span class="value">${data.worker[0].hashrate1m}</span><br>`;
-  html += `<span class="label">Last share:</span> <span class="value">${Math.floor((now - data.worker[0].lastshare)/60)} min ago</span><br>`;
-  html += `<span class="label">Best share:</span> <span class="best">${formatDiff(data.worker[0].bestshare)}</span><br>`;
-  html += `<span class="label">Total shares:</span> <span class="value">${(data.worker[0].shares/1e6).toFixed(1)}M</span><br></div>`;
-
-  html += `<div class="miner"><strong>R</strong> • ${data.worker[1].workername.split('.').pop()}<br>`;
-  html += `<span class="label">Hashrate 1m:</span> <span class="value">${data.worker[1].hashrate1m}</span><br>`;
-  html += `<span class="label">Last share:</span> <span class="value">${Math.floor((now - data.worker[1].lastshare)/60)} min ago</span><br>`;
-  html += `<span class="label">Best share:</span> <span class="best">${formatDiff(data.worker[1].bestshare)}</span><br>`;
-  html += `<span class="label">Total shares:</span> <span class="value">${(data.worker[1].shares/1e6).toFixed(1)}M</span><br></div>`;
-
-  html += `<div style="margin-top:40px;font-size:clamp(18px,4vw,28px);color:#00ffff">
-           Total Hashrate: ${data.hashrate1m} • Workers: ${data.workers}
-           </div>`;
-
-  statsEl.innerHTML = html;
 }
 
 function formatDiff(d){
@@ -101,6 +94,7 @@ function formatDiff(d){
   return d.toFixed(0);
 }
 
+// Go!
 update();
 setInterval(update, 5000);
 </script>
