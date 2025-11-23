@@ -52,7 +52,7 @@ const statsEl = document.getElementById('stats');
 let lastHrL = 0;
 let lastHrR = 0;
 
-// List of reliable public CORS proxies (updated for 2025)
+// Updated list of reliable public CORS proxies for 2025
 const proxies = [
   'https://corsproxy.io/?',
   'https://api.allorigins.win/raw?url=',
@@ -61,7 +61,8 @@ const proxies = [
   'https://cors-anywhere.herokuapp.com/',
   'https://api.codetabs.com/v1/proxy?quest=',
   'https://corsproxy.org/?',
-  'https://cloudflare-cors-anywhere.com/' // Assuming from lists
+  'https://cors.x2u.in/?',
+  'https://cors-anywhere.cloudflare.com/corsdemo/'
 ];
 
 const targetUrl = 'https://solo.ckpool.org/users/bc1qn8m9aqsmgk2t7yjvvene4jzy5rj0h04ttesvcc';
@@ -78,7 +79,7 @@ async function fetchWithFallback() {
       console.error(`Proxy failed: ${proxy}`, e);
     }
   }
-  throw new Error('All proxies failed');
+  throw new Error('All proxies failed - check internet or try later');
 }
 
 async function update(){
@@ -86,10 +87,13 @@ async function update(){
   
   try{
     const html = await fetchWithFallback();
+    if (html.trim() === '' || html.includes('-------') && !html.includes('<pre>')) {
+      throw new Error('Miners offline - no data available from CKPool');
+    }
     const preMatch = html.match(/<pre[^>]*>([\s\S]*?)<\/pre>/i);
-    if(!preMatch) throw new Error('No JSON found');
+    if(!preMatch) throw new Error('No JSON found on page');
     const data = JSON.parse(preMatch[1].trim());
-    if(!data || !data.worker || data.worker.length < 2) throw new Error('Invalid data');
+    if(!data || !data.worker || data.worker.length < 2) throw new Error('Invalid data format');
     
     const now = Date.now() / 1000;
     const hrL = parseFloat(data.worker[0].hashrate1m.replace(/T$/, ''));
@@ -118,13 +122,13 @@ async function update(){
     statsEl.innerHTML = htmlOut;
     
     setTimeout(() => {
-      document.querySelectorAll('.pulse-green, .pulse-red').forEach(el => {
+      document.querySelectorAll('.value').forEach(el => {
         el.classList.remove('pulse-green', 'pulse-red');
       });
     }, 500);
     
   }catch(e){
-    statsEl.innerHTML = `<span class="error">Failed to load: ${e.message}. Refresh or check console.</span>`;
+    statsEl.innerHTML = `<span class="error">${e.message || 'Unknown error'}. Refresh or check if miners are online.</span>`;
     console.error(e);
   }
 }
