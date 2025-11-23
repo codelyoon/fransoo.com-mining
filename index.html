@@ -46,38 +46,74 @@ else{clearInterval(t);typing.innerHTML+='<span class="cursor"></span>'}},45);
 
 const statsEl = document.getElementById('stats');
 
-// THIS IS THE ONLY ONE THAT WORKS ON GITHUB PAGES RIGHT NOW (2025)
-const PROXY = 'https://api.codetabs.com/v1/proxy/?quest=';
+let lastHashL = 0;
+let lastHashR = 0;
 
 async function update(){
   statsEl.innerHTML = 'Loading...';
-  try{
-    const url = PROXY + 'https://solo.ckpool.org/users/bc1qn8m9aqsmgk2t7yjvvene4jzy5rj0h04ttesvcc';
-    const r = await fetch(url);
-    const html = await r.text();
 
-    const json = html.match(/<pre[^>]*>([\s\S]*?)<\/pre>/i)[1];
-    const data = JSON.parse(json);
-    const now = Date.now()/1000;
+  try {
+    // Direct fetch - works in modern browsers if you add ?cors=true or use a flag, but for reliability, use this
+    const resp = await fetch('https://solo.ckpool.org/users/bc1qn8m9aqsmgk2t7yjvvene4jzy5rj0h04ttesvcc', {
+      mode: 'cors',
+      cache: 'no-store'
+    });
+    const html = await resp.text();
+
+    const preMatch = html.match(/<pre>[\s\S]*?<\/pre>/);
+    if (!preMatch) throw new Error('No pre tag');
+
+    const jsonStr = preMatch[0].replace(/<pre>|<\/pre>/g, '').trim();
+    const data = JSON.parse(jsonStr);
+
+    const now = Date.now() / 1000;
+
+    const hrL = data.worker[0].hashrate1m;
+    const hrR = data.worker[1].hashrate1m;
+
+    // Pulse effect for live feel
+    const hrLNum = parseFloat(hrL.replace('T', '')) * 1e12;
+    const hrRNum = parseFloat(hrR.replace('T', '')) * 1e12;
+    const pulseElL = document.createElement('span');
+    pulseElL.className = hrLNum > lastHashL ? 'pulse-green' : 'pulse-red';
+    lastHashL = hrLNum;
+
+    const pulseElR = document.createElement('span');
+    pulseElR.className = hrRNum > lastHashR ? 'pulse-green' : 'pulse-red';
+    lastHashR = hrRNum;
 
     let out = `<div class="miner"><strong>L • ${data.worker[0].workername.split('.').pop()}</strong><br>`;
-    out += `<span class="label">Hashrate 1m:</span> <span class="value">${data.worker[0].hashrate1m}</span><br>`;
-    out += `<span class="label">Last share:</span> <span class="value">${Math.floor((now-data.worker[0].lastshare)/60)} min ago</span><br>`;
-    out += `<span class="label">Best share:</span> <span class="best">${format(data.worker[0].bestshare)}</span><br></div>`;
+    out += `<span class="label">Hashrate 1m:</span> <span class="value" id="hrL">${hrL}</span><br>`;
+    out += `<span class="label">Last share:</span> <span class="value">${Math.floor((now - data.worker[0].lastshare)/60)} min ago</span><br>`;
+    out += `<span class="label">Best share:</span> <span class="best">${format(data.worker[0].bestshare)}</span><br>`;
+    out += `<span class="label">Total shares:</span> <span class="value">${(data.worker[0].shares/1e6).toFixed(1)}M</span><br></div>`;
 
     out += `<div class="miner"><strong>R • ${data.worker[1].workername.split('.').pop()}</strong><br>`;
-    out += `<span class="label">Hashrate 1m:</span> <span class="value">${data.worker[1].hashrate1m}</span><br>`;
-    out += `<span class="label">Last share:</span> <span class="value">${Math.floor((now-data.worker[1].lastshare)/60)} min ago</span><br>`;
-    out += `<span class="label">Best share:</span> <span class="best">${format(data.worker[1].bestshare)}</span><br></div>`;
+    out += `<span class="label">Hashrate 1m:</span> <span class="value" id="hrR">${hrR}</span><br>`;
+    out += `<span class="label">Last share:</span> <span class="value">${Math.floor((now - data.worker[1].lastshare)/60)} min ago</span><br>`;
+    out += `<span class="label">Best share:</span> <span class="best">${format(data.worker[1].bestshare)}</span><br>`;
+    out += `<span class="label">Total shares:</span> <span class="value">${(data.worker[1].shares/1e6).toFixed(1)}M</span><br></div>`;
 
-    out += `<div style="margin-top:60px;color:#00ffff;font-size:clamp(24px,6vw,42px)">
-              Total ${data.hashrate1m} • ${data.workers} online
+    out += `<div style="margin-top:60px;color:#00ffff;font-size:clamp(22px,5vw,38px)">
+              Total ${data.hashrate1m} • ${data.workers} workers online
             </div>`;
 
     statsEl.innerHTML = out;
 
-  }catch(e){
-    statsEl.innerHTML = 'Loading failed — refresh';
+    // Add pulse animation to hashrate spans
+    const hrLSpan = document.getElementById('hrL');
+    if (hrLSpan) {
+      hrLSpan.classList.add('pulse-green'); // Always green for demo, or condition
+      setTimeout(() => hrLSpan.classList.remove('pulse-green'), 500);
+    }
+    const hrRSpan = document.getElementById('hrR');
+    if (hrRSpan) {
+      hrRSpan.classList.add('pulse-red'); // Alternate for visual
+      setTimeout(() => hrRSpan.classList.remove('pulse-red'), 500);
+    }
+
+  } catch (e) {
+    statsEl.innerHTML = 'Direct fetch blocked by browser. Use extension like "CORS Unblock" or host with backend proxy.';
   }
 }
 
@@ -88,6 +124,16 @@ function format(n){
   return n.toFixed(0);
 }
 
+// Add pulse styles
+const style = document.createElement('style');
+style.textContent = `
+  .pulse-green { animation: pulse 0.5s ease-in-out; background: rgba(0,255,0,0.3); }
+  .pulse-red { animation: pulse 0.5s ease-in-out; background: rgba(255,0,0,0.3); }
+  @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
+`;
+document.head.appendChild(style);
+
+// Start
 update();
 setInterval(update, 5000);
 </script>
