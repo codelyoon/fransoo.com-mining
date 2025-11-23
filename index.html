@@ -17,8 +17,7 @@
   .label{color:#00ffff;display:inline-block;width:180px;text-align:right;margin-right:15px}
   .value{font-weight:bold;color:#0f8}
   .best{color:#0f0}
-  .pulse-green{background:rgba(0,255,0,0.3)!important}
-  .pulse-red{background:rgba(255,0,0,0.3)!important}
+  .error{color:#f44}
 </style>
 </head>
 <body>
@@ -51,28 +50,65 @@ else{clearInterval(t);typing.innerHTML+='<span class="cursor"></span>'}},45);
 const statsEl = document.getElementById('stats');
 
 async function update(){
+  statsEl.innerHTML = 'Loading...';
+  
+  // MOCK DATA FOR TESTING (uncomment below to test without API)
+  /*
+  const data = {
+    "hashrate1m": "9.5T",
+    "workers": 2,
+    "worker": [
+      {
+        "workername": "bc1qn8m9aqsmgk2t7yjvvene4jzy5rj0h04ttesvcc.fransooL",
+        "hashrate1m": "4.73T",
+        "lastshare": Math.floor(Date.now() / 1000) - 120,
+        "shares": 2778806995,
+        "bestshare": 210690044.4203128
+      },
+      {
+        "workername": "bc1qn8m9aqsmgk2t7yjvvene4jzy5rj0h04ttesvcc.fransooR",
+        "hashrate1m": "4.91T",
+        "lastshare": Math.floor(Date.now() / 1000) - 45,
+        "shares": 2575948749,
+        "bestshare": 2666295200.523154
+      }
+    ]
+  };
+  displayData(data);
+  return;
+  */
+
   try{
     const r = await fetch('https://solo.ckpool.org/users/bc1qn8m9aqsmgk2t7yjvvene4jzy5rj0h04ttesvcc',{cache:'no-store'});
+    if (!r.ok) throw new Error(`HTTP ${r.status}`);
     const data = await r.json();
-    if(!data || !data.worker) return;
+    if(!data || !data.worker) throw new Error('No worker data');
+    displayData(data);
+  }catch(e){
+    console.error('Fetch error:', e);
+    statsEl.innerHTML = `<span class="error">API Error - ${e.message}. Check console or URL in browser.</span>`;
+  }
+}
 
-    const now = Date.now();
-    let html = `<div class="miner"><strong>L</strong> • ${data.worker[0].workername.split('.').pop()}<br>`;
-    html += `<span class="label">Hashrate 1m:</span> <span class="value">${data.worker[0].hashrate1m}</span><br>`;
-    html += `<span class="label">Last share:</span> <span class="value">${Math.floor((now/1000 - data.worker[0].lastshare)/60)} min ago</span><br>`;
-    html += `<span class="label">Best share:</span> <span class="best">${formatDiff(data.worker[0].bestshare)}</span><br></div>`;
+function displayData(data){
+  const now = Date.now() / 1000;
+  let html = `<div class="miner"><strong>L</strong> • ${data.worker[0].workername.split('.').pop()}<br>`;
+  html += `<span class="label">Hashrate 1m:</span> <span class="value">${data.worker[0].hashrate1m}</span><br>`;
+  html += `<span class="label">Last share:</span> <span class="value">${Math.floor((now - data.worker[0].lastshare)/60)} min ago</span><br>`;
+  html += `<span class="label">Best share:</span> <span class="best">${formatDiff(data.worker[0].bestshare)}</span><br>`;
+  html += `<span class="label">Total shares:</span> <span class="value">${(data.worker[0].shares/1e6).toFixed(1)}M</span><br></div>`;
 
-    html += `<div class="miner"><strong>R</strong> • ${data.worker[1].workername.split('.').pop()}<br>`;
-    html += `<span class="label">Hashrate 1m:</span> <span class="value">${data.worker[1].hashrate1m}</span><br>`;
-    html += `<span class="label">Last share:</span> <span class="value">${Math.floor((now/1000 - data.worker[1].lastshare)/60)} min ago</span><br>`;
-    html += `<span class="label">Best share:</span> <span class="best">${formatDiff(data.worker[1].bestshare)}</span><br></div>`;
+  html += `<div class="miner"><strong>R</strong> • ${data.worker[1].workername.split('.').pop()}<br>`;
+  html += `<span class="label">Hashrate 1m:</span> <span class="value">${data.worker[1].hashrate1m}</span><br>`;
+  html += `<span class="label">Last share:</span> <span class="value">${Math.floor((now - data.worker[1].lastshare)/60)} min ago</span><br>`;
+  html += `<span class="label">Best share:</span> <span class="best">${formatDiff(data.worker[1].bestshare)}</span><br>`;
+  html += `<span class="label">Total shares:</span> <span class="value">${(data.worker[1].shares/1e6).toFixed(1)}M</span><br></div>`;
 
-    html += `<div style="margin-top:40px;font-size:clamp(18px,4vw,28px);color:#00ffff">
-             Total Hashrate: ${data.hashrate1m} • Workers: ${data.workers}
-             </div>`;
+  html += `<div style="margin-top:40px;font-size:clamp(18px,4vw,28px);color:#00ffff">
+           Total Hashrate: ${data.hashrate1m} • Workers: ${data.workers}
+           </div>`;
 
-    statsEl.innerHTML = html;
-  }catch(e){}
+  statsEl.innerHTML = html;
 }
 
 function formatDiff(d){
