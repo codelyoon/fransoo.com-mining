@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>fransoo.com | Mining Portal</title>
+<style>
+  body{background:#000;color:#00bfff;font-family:'Courier New',monospace;margin:0;height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative;overflow:hidden}
+  #static{position:absolute;inset:0;opacity:0.85;pointer-events:none;z-index:1}
+  .container{z-index:2;width:100%;max-width:1100px;padding:20px;box-sizing:border-box;text-align:center}
+  .typing{font-size:clamp(16px,4vw,22px);margin-bottom:30px;white-space:pre-line}
+  .cursor{display:inline-block;width:9px;height:1.2em;background:#00bfff;animation:b 1s infinite}
+  @keyframes b{0%,50%{opacity:1}51%,100%{opacity:0}}
+  h1{font-size:clamp(32px,8vw,60px);margin:0 0 40px;color:#00bfff;text-shadow:0 0 20px #00bfff}
+  .stats{font-size:clamp(20px,5vw,36px);line-height:1.8}
+  .miner{margin:40px 0}
+  .label{color:#00ffff;display:inline-block;width:180px;text-align:right;margin-right:15px}
+  .value{font-weight:bold;color:#0f8}
+  .best{color:#0f0}
+  .pulse-green{background:rgba(0,255,0,0.3)!important}
+  .pulse-red{background:rgba(255,0,0,0.3)!important}
+</style>
+</head>
+<body>
+<canvas id="static"></canvas>
+
+<div class="container">
+  <div class="typing" id="typing"></div>
+  <h1 id="title">fransoo miners • solo.ckpool</h1>
+  
+  <div class="stats" id="stats">Loading...</div>
+</div>
+
+<script>
+// Static CRT noise
+const s=document.getElementById('static'),c=s.getContext('2d');
+s.width=innerWidth;s.height=innerHeight;
+window.addEventListener('resize',()=>{s.width=innerWidth;s.height=innerHeight});
+(function n(){const i=c.createImageData(s.width,s.height),d=new Uint32Array(i.data.buffer);
+for(let j=0;j<d.length;j++)if(Math.random()<0.09)d[j]=0x33ffffff;
+c.putImageData(i,0,0);requestAnimationFrame(n)})();
+
+// Typing animation
+const intro=`welcome to fransoo.com mining portal
+two bitaxe miners • live stats • solo.ckpool`;
+const typing=document.getElementById('typing');
+let i=0;
+const t=setInterval(()=>{if(i<intro.length){typing.innerHTML+=intro[i]==='\n'?'<br>':intro[i];i++}
+else{clearInterval(t);typing.innerHTML+='<span class="cursor"></span>'}},45);
+
+const statsEl = document.getElementById('stats');
+
+async function update(){
+  try{
+    const r = await fetch('https://solo.ckpool.org/users/bc1qn8m9aqsmgk2t7yjvvene4jzy5rj0h04ttesvcc',{cache:'no-store'});
+    const data = await r.json();
+    if(!data || !data.worker) return;
+
+    const now = Date.now();
+    let html = `<div class="miner"><strong>L</strong> • ${data.worker[0].workername.split('.').pop()}<br>`;
+    html += `<span class="label">Hashrate 1m:</span> <span class="value">${data.worker[0].hashrate1m}</span><br>`;
+    html += `<span class="label">Last share:</span> <span class="value">${Math.floor((now/1000 - data.worker[0].lastshare)/60)} min ago</span><br>`;
+    html += `<span class="label">Best share:</span> <span class="best">${formatDiff(data.worker[0].bestshare)}</span><br></div>`;
+
+    html += `<div class="miner"><strong>R</strong> • ${data.worker[1].workername.split('.').pop()}<br>`;
+    html += `<span class="label">Hashrate 1m:</span> <span class="value">${data.worker[1].hashrate1m}</span><br>`;
+    html += `<span class="label">Last share:</span> <span class="value">${Math.floor((now/1000 - data.worker[1].lastshare)/60)} min ago</span><br>`;
+    html += `<span class="label">Best share:</span> <span class="best">${formatDiff(data.worker[1].bestshare)}</span><br></div>`;
+
+    html += `<div style="margin-top:40px;font-size:clamp(18px,4vw,28px);color:#00ffff">
+             Total Hashrate: ${data.hashrate1m} • Workers: ${data.workers}
+             </div>`;
+
+    statsEl.innerHTML = html;
+  }catch(e){}
+}
+
+function formatDiff(d){
+  if(d>1e12) return (d/1e12).toFixed(3)+'T';
+  if(d>1e9) return (d/1e9).toFixed(3)+'G';
+  if(d>1e6) return (d/1e6).toFixed(3)+'M';
+  return d.toFixed(0);
+}
+
+update();
+setInterval(update, 5000);
+</script>
+</body>
+</html>
