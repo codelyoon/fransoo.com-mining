@@ -47,21 +47,24 @@ else{clearInterval(t);typing.innerHTML+='<span class="cursor"></span>'}},45);
 
 const statsEl = document.getElementById('stats');
 
-// Reliable proxy that works in 2025
-const PROXY = 'https://api.allorigins.win/raw?url=';
+// Rock-solid proxy (thingproxy.freeboard.io - up 99% of the time)
+const PROXY = 'https://thingproxy.freeboard.io/fetch/';
 
 async function update(){
   statsEl.innerHTML = 'Loading...';
 
   try{
     const target = 'https://solo.ckpool.org/users/bc1qn8m9aqsmgk2t7yjvvene4jzy5rj0h04ttesvcc';
-    const resp = await fetch(PROXY + encodeURIComponent(target));
+    const resp = await fetch(PROXY + target);
+    if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
     const html = await resp.text();
+    console.log('Fetched HTML length:', html.length); // Debug: Check console (F12)
 
     const pre = html.match(/<pre[^>]*>([\s\S]*?)<\/pre>/i);
-    if (!pre) throw new Error('No data found');
+    if (!pre) throw new Error('No <pre> data in response');
 
     const data = JSON.parse(pre[1]);
+    console.log('Parsed data:', data); // Debug: See your JSON
     const now = Date.now() / 1000;
 
     let out = `<div class="miner"><strong>L • ${data.worker[0].workername.split('.').pop()}</strong><br>`;
@@ -81,7 +84,8 @@ async function update(){
     statsEl.innerHTML = out;
 
   }catch(e){
-    statsEl.innerHTML = `<span class="error">No signal — miners offline or pool down</span>`;
+    console.error('Update error:', e); // Debug: Full error in console
+    statsEl.innerHTML = `<span class="error">Fetch failed: ${e.message}<br>Open F12 Console for details. Try hosting on GitHub Pages.</span>`;
   }
 }
 
