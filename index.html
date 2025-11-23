@@ -17,6 +17,7 @@
   .label{color:#00ffff;display:inline-block;width:210px;text-align:right;margin-right:15px}
   .value{font-weight:bold;color:#0f8}
   .best{color:#0f0}
+  .error{color:#f44}
 </style>
 </head>
 <body>
@@ -29,7 +30,7 @@
 </div>
 
 <script>
-// Static noise
+// Static CRT noise
 const s=document.getElementById('static'),ctx=s.getContext('2d');
 s.width=innerWidth;s.height=innerHeight;
 window.addEventListener('resize',()=>{s.width=innerWidth;s.height=innerHeight});
@@ -37,7 +38,7 @@ window.addEventListener('resize',()=>{s.width=innerWidth;s.height=innerHeight});
 for(let j=0;j<d.length;j++)if(Math.random()<0.09)d[j]=0x33ffffff;
 ctx.putImageData(i,0,0);requestAnimationFrame(n)})();
 
-// Typing
+// Typing animation
 const intro=`welcome to fransoo.com mining portal\ntwo bitaxe miners • live stats • solo.ckpool`;
 const typing=document.getElementById('typing');
 let i=0;
@@ -46,31 +47,31 @@ else{clearInterval(t);typing.innerHTML+='<span class="cursor"></span>'}},45);
 
 const statsEl = document.getElementById('stats');
 
-// THIS PROXY IS WORKING RIGHT NOW (November 2025)
-const PROXY = 'https://corsproxy.io/?';
+// Reliable proxy that works in 2025
+const PROXY = 'https://api.allorigins.win/raw?url=';
 
 async function update(){
   statsEl.innerHTML = 'Loading...';
 
   try{
-    const url = PROXY + encodeURIComponent('https://solo.ckpool.org/users/bc1qn8m9aqsmgk2t7yjvvene4jzy5rj0h04ttesvcc');
-    const resp = await fetch(url);
+    const target = 'https://solo.ckpool.org/users/bc1qn8m9aqsmgk2t7yjvvene4jzy5rj0h04ttesvcc';
+    const resp = await fetch(PROXY + encodeURIComponent(target));
     const html = await resp.text();
 
     const pre = html.match(/<pre[^>]*>([\s\S]*?)<\/pre>/i);
-    if (!pre) throw 'No data';
+    if (!pre) throw new Error('No data found');
 
     const data = JSON.parse(pre[1]);
-    const now = Date.now()/1000;
+    const now = Date.now() / 1000;
 
     let out = `<div class="miner"><strong>L • ${data.worker[0].workername.split('.').pop()}</strong><br>`;
     out += `<span class="label">Hashrate 1m:</span> <span class="value">${data.worker[0].hashrate1m}</span><br>`;
-    out += `<span class="label">Last share:</span> <span class="value">${Math.floor((now-data.worker[0].lastshare)/60)} min ago</span><br>`;
+    out += `<span class="label">Last share:</span> <span class="value">${Math.floor((now - data.worker[0].lastshare)/60)} min ago</span><br>`;
     out += `<span class="label">Best share:</span> <span class="best">${format(data.worker[0].bestshare)}</span><br></div>`;
 
     out += `<div class="miner"><strong>R • ${data.worker[1].workername.split('.').pop()}</strong><br>`;
     out += `<span class="label">Hashrate 1m:</span> <span class="value">${data.worker[1].hashrate1m}</span><br>`;
-    out += `<span class="label">Last share:</span> <span class="value">${Math.floor((now-data.worker[1].lastshare)/60)} min ago</span><br>`;
+    out += `<span class="label">Last share:</span> <span class="value">${Math.floor((now - data.worker[1].lastshare)/60)} min ago</span><br>`;
     out += `<span class="label">Best share:</span> <span class="best">${format(data.worker[1].bestshare)}</span><br></div>`;
 
     out += `<div style="margin-top:60px;color:#00ffff;font-size:clamp(22px,5vw,38px)">
@@ -80,7 +81,7 @@ async function update(){
     statsEl.innerHTML = out;
 
   }catch(e){
-    statsEl.innerHTML = 'Proxy down — try again in a minute';
+    statsEl.innerHTML = `<span class="error">No signal — miners offline or pool down</span>`;
   }
 }
 
@@ -91,6 +92,7 @@ function format(n){
   return n.toFixed(0);
 }
 
+// Start
 update();
 setInterval(update, 5000);
 </script>
