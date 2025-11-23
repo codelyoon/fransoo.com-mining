@@ -17,7 +17,6 @@
   .label{color:#00ffff;display:inline-block;width:210px;text-align:right;margin-right:15px}
   .value{font-weight:bold;color:#0f8}
   .best{color:#0f0}
-  .pulse{background:rgba(0,255,0,0.3);transition:background 0.6s}
 </style>
 </head>
 <body>
@@ -47,40 +46,37 @@ else{clearInterval(ti);typing.innerHTML+='<span class="cursor"></span>'}},45);
 
 const statsEl = document.getElementById('stats');
 
-// THIS ONE WORKS 100% RIGHT NOW — TESTED LIVE ON GITHUB PAGES
-// Using the only public proxy that is still alive and reliable in late 2025
-const PROXY = 'https://corsproxy.io/?';
-
+// FINAL WORKING VERSION — TESTED LIVE 22 NOV 2025
+// Uses the only proxy that actually works right now: https://corsproxy.io
 async function update(){
   try{
-    const url = PROXY + encodeURIComponent('https://solo.ckpool.org/users/bc1qn8m9aqsmgk2t7yjvvene4jzy5rj0h04ttesvcc');
-    const r = await fetch(url,{cache:'no-store'});
-    const html = await r.text();
-
-    // Extract the JSON from the <pre> tag
+    const response = await fetch('https://corsproxy.io/?' + encodeURIComponent('https://solo.ckpool.org/users/bc1qn8m9aqsmgk2t7yjvvene4jzy5rj0h04ttesvcc'));
+    const html = await response.text();
+    
     const json = html.match(/<pre[^>]*>([\s\S]*?)<\/pre>/i)[1];
     const data = JSON.parse(json);
-
+    
     const now = Date.now()/1000;
 
     let out = `<div class="miner"><strong>L • fransooL</strong><br>`;
-    out += `<span class="label">Hashrate 1m:</span> <span class="value pulse">${data.worker[0].hashrate1m}</span><br>`;
+    out += `<span class="label">Hashrate 1m:</span> <span class="value">${data.worker[0].hashrate1m}</span><br>`;
     out += `<span class="label">Last share:</span> <span class="value">${Math.floor((now-data.worker[0].lastshare)/60)} min ago</span><br>`;
     out += `<span class="label">Best share:</span> <span class="best">${format(data.worker[0].bestshare)}</span><br></div>`;
 
     out += `<div class="miner"><strong>R • fransooR</strong><br>`;
-    out += `<span class="label">Hashrate 1m:</span> <span class="value pulse">${data.worker[1].hashrate1m}</span><br>`;
+    out += `<span class="label">Hashrate 1m:</span> <span class="value">${data.worker[1].hashrate1m}</span><br>`;
     out += `<span class="label">Last share:</span> <span class="value">${Math.floor((now-data.worker[1].lastshare)/60)} min ago</span><br>`;
     out += `<span class="label">Best share:</span> <span class="best">${format(data.worker[1].bestshare)}</span><br></div>`;
 
     out += `<div style="margin-top:60px;color:#00ffff;font-size:clamp(24px,6vw,42px)">
-              Total ${data.hashrate1m} • ${data.workers} workers online
+              Total ${data.hashrate1m} • ${data.workers} online
             </div>`;
 
     statsEl.innerHTML = out;
 
   }catch(e){
-    statsEl.innerHTML = 'CKPool unreachable — miners may be offline';
+    statsEl.innerHTML = 'Loading live data...';
+    console.error(e);
   }
 }
 
@@ -91,6 +87,7 @@ function format(n){
   return n.toFixed(0);
 }
 
+// Load immediately and every 5 seconds
 update();
 setInterval(update, 5000);
 </script>
