@@ -3,25 +3,56 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SpongeBob in Egypt: Logic Escape v2</title>
+<title>SpongeBob in Egypt: Logic Escape v3</title>
 <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
   body {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
-    background: linear-gradient(180deg, #d4a574 0%, #c19a6b 50%, #8b6914 100%);
+    background: linear-gradient(180deg, #f4a460 0%, #cd853f 40%, #8b4513 100%);
     min-height: 100vh;
     padding: 20px;
     color: #2c1810;
+    position: relative;
+    overflow-x: hidden;
   }
-.container { max-width: 800px; margin: 0 auto; }
+  body::before {
+    content: '🏜️';
+    position: fixed;
+    top: 10%;
+    right: 5%;
+    font-size: 120px;
+    opacity: 0.1;
+    z-index: 0;
+  }
+  body::after {
+    content: '🧽';
+    position: fixed;
+    bottom: 10%;
+    left: 5%;
+    font-size: 100px;
+    opacity: 0.15;
+    z-index: 0;
+    animation: float 6s ease-in-out infinite;
+  }
+  @keyframes float {
+    0%, 100% { transform: translateY(0px) rotate(-5deg); }
+    50% { transform: translateY(-20px) rotate(5deg); }
+  }
+.container { max-width: 800px; margin: 0 auto; position: relative; z-index: 1; }
 .header {
-    background: #ffeb3b;
+    background: rgba(255, 235, 59, 0.95);
+    backdrop-filter: blur(10px);
     border: 4px solid #2c1810;
     border-radius: 15px;
     padding: 20px;
     text-align: center;
     margin-bottom: 20px;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+    box-shadow: 0 8px 16px rgba(0,0,0,0.4);
+  }
+.pyramid-svg {
+    width: 100%;
+    height: 60px;
+    margin-bottom: 10px;
   }
   h1 { font-size: 28px; margin-bottom: 10px; }
 .water-meter {
@@ -43,12 +74,14 @@
     font-weight: bold;
   }
 .puzzle {
-    background: #f5deb3;
+    background: rgba(245, 222, 179, 0.95);
+    backdrop-filter: blur(5px);
     border: 4px solid #2c1810;
     border-radius: 15px;
     padding: 20px;
     margin-bottom: 20px;
     display: none;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
   }
 .puzzle.active { display: block; }
 .puzzle h2 { color: #8b4513; margin-bottom: 15px; font-size: 22px; }
@@ -67,8 +100,8 @@
     border: 3px solid #2c1810;
     border-radius: 8px;
     font-family: monospace;
-    text-transform: uppercase;
   }
+  input[type="text"] { text-transform: uppercase; }
   button {
     background: #ff9800;
     color: #2c1810;
@@ -79,9 +112,11 @@
     border-radius: 8px;
     cursor: pointer;
     margin: 5px;
+    transition: transform 0.1s;
   }
-  button:hover { background: #ffa726; }
-  button:disabled { background: #ccc; cursor: not-allowed; }
+  button:hover { background: #ffa726; transform: scale(1.05); }
+  button:active { transform: scale(0.98); }
+  button:disabled { background: #ccc; cursor: not-allowed; transform: none; }
 .btn-hint { background: #4caf50; }
 .btn-solution { background: #f44336; color: white; }
 .hints,.solution {
@@ -92,7 +127,11 @@
     border-radius: 8px;
     display: none;
   }
-.hints.show,.solution.show { display: block; }
+.hints.show,.solution.show { display: block; animation: slideDown 0.3s ease; }
+  @keyframes slideDown {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
 .hint-item { margin: 8px 0; padding-left: 20px; }
 .grid {
     display: grid;
@@ -112,18 +151,27 @@
     background: #fff;
     border-radius: 8px;
     cursor: pointer;
+    transition: all 0.2s;
   }
-.grid-cell.selected { background: #ffeb3b; }
+.grid-cell:hover { background: #ffeb3b; transform: scale(1.1); }
 .code-display {
     font-family: monospace;
     background: #2c1810;
     color: #4fc3f7;
-    padding: 10px;
-    border-radius: 5px;
-    font-size: 18px;
+    padding: 15px;
+    border-radius: 8px;
+    font-size: 20px;
     margin: 10px 0;
+    letter-spacing: 3px;
+    text-align: center;
   }
-.nav { text-align: center; margin: 20px 0; }
+.morse-letter {
+    display: inline-block;
+    margin: 0 8px;
+    padding: 5px 10px;
+    background: #1a1a1a;
+    border-radius: 4px;
+  }
 .success { color: #4caf50; font-weight: bold; font-size: 18px; }
 .error { color: #f44336; font-weight: bold; }
 .game-over {
@@ -148,7 +196,12 @@
 <body>
 <div class="container">
   <div class="header">
-    <h1>🧽 SpongeBob in Egypt: Logic Escape v2 🏜️</h1>
+    <svg class="pyramid-svg" viewBox="0 0 200 60" xmlns="http://www.w3.org/2000/svg">
+      <polygon points="100,5 20,55 180,55" fill="#d4a574" stroke="#8b4513" stroke-width="2"/>
+      <polygon points="100,5 60,55 140,55" fill="#cd853f" stroke="#8b4513" stroke-width="2"/>
+      <text x="100" y="45" text-anchor="middle" font-size="20">🏺</text>
+    </svg>
+    <h1>🧽 SpongeBob in Egypt: Logic Escape v3 🏜️</h1>
     <p>SpongeBob is drying out! Solve 5 puzzles to get back to Bikini Bottom</p>
     <div class="water-meter">
       <div class="water-fill" id="waterFill">100% 💧</div>
@@ -156,12 +209,12 @@
     <p><a href="/mnt/data/CodeSheet-201912.pdf_-_CodeSheet.pdf" target="_blank">📄 View Code Sheet</a></p>
   </div>
 
-  <!-- Puzzle 1 - UPDATED -->
+  <!-- Puzzle 1: UPDATED - Answer is SPONGEBOB -->
   <div class="puzzle active" id="puzzle1">
-    <h2>Puzzle 1: Hieroglyph Cipher</h2>
+    <h2>Puzzle 1: Hieroglyph Cipher 🗿</h2>
     <div class="story">SpongeBob found a wall of numbers in the pyramid. The ghost of King Crab says "Decode my name to proceed!"</div>
     <p><strong>Decode:</strong></p>
-    <div class="code-display">19-16-15-14-7-5-2-15-2</div>
+    <div class="code-display">19 - 16 - 15 - 14 - 7 - 5 - 2 - 15 - 2</div>
     <p>Use A=1...Z=26. Type the word you decoded.</p>
     <div class="input-group">
       <input type="text" id="ans1" placeholder="Enter the word">
@@ -180,9 +233,9 @@
     <div id="result1"></div>
   </div>
 
-  <!-- Puzzle 2 - UPDATED -->
+  <!-- Puzzle 2: UPDATED - Answer is 29119149 -->
   <div class="puzzle" id="puzzle2">
-    <h2>Puzzle 2: Sarcophagus NATO Lock</h2>
+    <h2>Puzzle 2: Sarcophagus NATO Lock ⚔️</h2>
     <div class="story">The sarcophagus only opens with a military call sign. A mummy whispers the full code...</div>
     <p><strong>Decode:</strong></p>
     <div class="code-display">BRAVO - INDIA - KILO - INDIA - NOVEMBER - INDIA</div>
@@ -204,77 +257,86 @@
     <div id="result2"></div>
   </div>
 
-  <!-- Puzzle 3 -->
+  <!-- Puzzle 3: UPDATED - Spaced out Morse, Answer is SEA WATER -->
   <div class="puzzle" id="puzzle3">
-    <h2>Puzzle 3: Tomb Tap Code</h2>
-    <div class="story">Ancient drums tap out a message. SpongeBob needs water!</div>
-    <p><strong>Decode Morse:</strong></p>
-    <div class="code-display">.....- /.--.- -..-.</div>
-    <p>Answer = SEA WATER → Use key: SEA=12, WATER=34 → Code = 1234</p>
-    <div class="input-group">
-      <input type="number" id="ans3" placeholder="Enter 4-digit code">
+    <h2>Puzzle 3: Tomb Tap Code 📡</h2>
+    <div class="story">Ancient drums tap out a message. SpongeBob desperately needs this!</div>
+    <p><strong>Decode Morse - each letter spaced out:</strong></p>
+    <div class="code-display">
+      <span class="morse-letter">...</span>
+      <span class="morse-letter">.</span>
+      <span class="morse-letter">.-</span>
+      <span style="margin: 0 15px; background: #444;">/</span>
+      <span class="morse-letter">.--</span>
+      <span class="morse-letter">.-</span>
+      <span class="morse-letter">-</span>
+      <span class="morse-letter">.</span>
+      <span class="morse-letter">.-.</span>
     </div>
-    <button onclick="checkAnswer(3, 1234)">Check Answer</button>
+    <p>Type the two words with a space between them.</p>
+    <div class="input-group">
+      <input type="text" id="ans3" placeholder="Enter the phrase">
+    </div>
+    <button onclick="checkAnswer(3, 'SEA WATER')">Check Answer</button>
     <button class="btn-hint" onclick="showHints(3)">Show Hints</button>
     <button class="btn-solution" onclick="showSolution(3)">Show Solution</button>
     <div class="hints" id="hints3">
-      <div class="hint-item">💡 Hint 1:... = S,. = E,.- = A → SEA</div>
-      <div class="hint-item">💡 Hint 2:.-- = W,.- = A, - = T,. = E,.-. = R → WATER</div>
-      <div class="hint-item">💡 Hint 3: SEA=12, WATER=34 → 1234</div>
+      <div class="hint-item">💡 Hint 1:... = S,. = E,.- = A → First word is SEA</div>
+      <div class="hint-item">💡 Hint 2:.-- = W,.- = A, - = T,. = E,.-. = R → Second word is WATER</div>
+      <div class="hint-item">💡 Hint 3: Answer is SEA WATER</div>
     </div>
     <div class="solution" id="solution3">
-      <strong>Solution:</strong>.....- = SEA,.--.- -..-. = WATER → <strong>1234</strong>
+      <strong>Solution:</strong>... = S,. = E,.- = A → SEA |.-- = W,.- = A, - = T,. = E,.-. = R → WATER → <strong>SEA WATER</strong>
     </div>
     <div id="result3"></div>
   </div>
 
-  <!-- Puzzle 4 -->
+  <!-- Puzzle 4: UPDATED - Answer is 2 for jellyfish -->
   <div class="puzzle" id="puzzle4">
-    <h2>Puzzle 4: Anubis Pattern Lock</h2>
+    <h2>Puzzle 4: Anubis Pattern Lock 🪼</h2>
     <div class="story">Each row/column needs one of each: 🦀 crab=1, 🪼 jellyfish=2, 🍴 spatula=3. Find the missing piece!</div>
     <div class="grid" id="patternGrid">
       <div class="grid-cell">🦀</div><div class="grid-cell">🪼</div><div class="grid-cell">🍴</div>
       <div class="grid-cell">🪼</div><div class="grid-cell">🍴</div><div class="grid-cell">🦀</div>
-      <div class="grid-cell">🍴</div><div class="grid-cell">🦀</div><div class="grid-cell" onclick="selectCell(this)">?</div>
+      <div class="grid-cell">🍴</div><div class="grid-cell">🦀</div><div class="grid-cell">?</div>
     </div>
-    <p>Click the? and select: 🦀=1, 🪼=2, 🍴=3</p>
+    <p>What goes in the? spot? Enter: 1 for 🦀, 2 for 🪼, 3 for 🍴</p>
     <div class="input-group">
       <input type="number" id="ans4" placeholder="Enter number (1, 2, or 3)" min="1" max="3">
     </div>
-    <button onclick="checkAnswer(4, 3)">Check Answer</button>
+    <button onclick="checkAnswer(4, 2)">Check Answer</button>
     <button class="btn-hint" onclick="showHints(4)">Show Hints</button>
     <button class="btn-solution" onclick="showSolution(4)">Show Solution</button>
     <div class="hints" id="hints4">
-      <div class="hint-item">💡 Hint 1: Row 3 has 🦀 and 🍴</div>
-      <div class="hint-item">💡 Hint 2: Column 3 has 🍴 and 🦀</div>
-      <div class="hint-item">💡 Hint 3: Missing piece is 🍴 = 3</div>
+      <div class="hint-item">💡 Hint 1: Row 3 has 🦀 and 🍴, so it needs 🪼</div>
+      <div class="hint-item">💡 Hint 2: Column 3 has 🍴 and 🦀, so it also needs 🪼</div>
+      <div class="hint-item">💡 Hint 3: 🪼 jellyfish = 2</div>
     </div>
     <div class="solution" id="solution4">
-      <strong>Solution:</strong> Only 🍴 fits → <strong>3</strong>
+      <strong>Solution:</strong> Row 3 and Column 3 both need 🪼 → <strong>2</strong>
     </div>
     <div id="result4"></div>
   </div>
 
-  <!-- Puzzle 5 -->
+  <!-- Puzzle 5: NEW - Word puzzle using first letters -->
   <div class="puzzle" id="puzzle5">
-    <h2>Puzzle 5: Pharaoh's Final Riddle - Meta Puzzle</h2>
-    <div class="story">The exit portal needs energy from all 4 codes combined!</div>
-    <p><strong>Formula:</strong> Add all 4 puzzle codes, then subtract 1000</p>
-    <p><em>Note: Puzzle 1 word = 0 for math, or use 1905 if you want. For this version: 0 + 29119149 + 1234 + 3 - 1000 = 29119386</em></p>
-    <div class="code-display" id="codeSummary">Your codes:? +? +? +? - 1000 =?</div>
+    <h2>Puzzle 5: Pharaoh's Word Lock 👑</h2>
+    <div class="story">The final door needs a 4-letter word. Use the FIRST LETTER of each previous answer!</div>
+    <p><strong>Riddle:</strong> Take the first letter from Puzzle 1, 2, 3, and 4. Unscramble them to spell a word meaning "the person in charge".</p>
+    <div class="code-display" id="codeSummary">Letters: S + B + S + J =?</div>
     <div class="input-group">
-      <input type="number" id="ans5" placeholder="Enter final exit code">
+      <input type="text" id="ans5" placeholder="Enter 4-letter word">
     </div>
-    <button onclick="checkAnswer(5, 29119386)">Check Answer</button>
+    <button onclick="checkAnswer(5, 'BOSS')">Check Answer</button>
     <button class="btn-hint" onclick="showHints(5)">Show Hints</button>
     <button class="btn-solution" onclick="showSolution(5)">Show Solution</button>
     <div class="hints" id="hints5">
-      <div class="hint-item">💡 Hint 1: SPONGEBOB = 0 for this puzzle</div>
-      <div class="hint-item">💡 Hint 2: 0 + 29119149 + 1234 + 3 = 29120386</div>
-      <div class="hint-item">💡 Hint 3: 29120386 - 1000 = 29119386</div>
+      <div class="hint-item">💡 Hint 1: S from SPONGEBOB, B from BIKINI, S from SEA, J from JELLYFISH</div>
+      <div class="hint-item">💡 Hint 2: You have S, B, S, J. Rearrange them.</div>
+      <div class="hint-item">💡 Hint 3: The boss of the Krusty Krab is... BOSS</div>
     </div>
     <div class="solution" id="solution5">
-      <strong>Solution:</strong> 0 + 29119149 + 1234 + 3 - 1000 = <strong>29119386</strong>
+      <strong>Solution:</strong> S + B + S + J unscrambles to <strong>BOSS</strong>
     </div>
     <div id="result5"></div>
   </div>
@@ -288,7 +350,7 @@
   <div class="win" id="winScreen">
     <h2>🎉 YOU ESCAPED! 🎉</h2>
     <p>SpongeBob made it back to Bikini Bottom!</p>
-    <p>Final Code: 29119386</p>
+    <p>Final Word: BOSS</p>
     <button onclick="location.reload()">Play Again</button>
   </div>
 </div>
@@ -315,16 +377,21 @@ function checkAnswer(puzzleNum, correct) {
   const result = document.getElementById('result' + puzzleNum);
   let userAns = input.value.trim().toUpperCase();
 
-  if (puzzleNum === 1) {
+  if (puzzleNum === 1 || puzzleNum === 3 || puzzleNum === 5) {
     if (userAns === correct) {
       result.innerHTML = '<p class="success">✅ Correct! Moving to next puzzle...</p>';
-      answers[puzzleNum] = 0; // For meta puzzle calc
+      answers[puzzleNum] = correct;
       input.disabled = true;
       updateCodeSummary();
       setTimeout(() => {
-        document.getElementById('puzzle' + puzzleNum).classList.remove('active');
-        document.getElementById('puzzle' + (puzzleNum + 1)).classList.add('active');
-        currentPuzzle = puzzleNum + 1;
+        if (puzzleNum < 5) {
+          document.getElementById('puzzle' + puzzleNum).classList.remove('active');
+          document.getElementById('puzzle' + (puzzleNum + 1)).classList.add('active');
+          currentPuzzle = puzzleNum + 1;
+        } else {
+          document.querySelectorAll('.puzzle').forEach(p => p.style.display = 'none');
+          document.getElementById('winScreen').style.display = 'block';
+        }
       }, 1500);
     } else {
       result.innerHTML = '<p class="error">❌ Wrong! -10% water</p>';
@@ -356,23 +423,23 @@ function checkAnswer(puzzleNum, correct) {
 }
 
 function showHints(num) {
-  document.getElementById('hints' + num).classList.toggle('show');
+  const hints = document.getElementById('hints' + num);
+  hints.classList.toggle('show');
 }
 
 function showSolution(num) {
-  document.getElementById('solution' + num).classList.toggle('show');
+  const sol = document.getElementById('solution' + num);
+  sol.classList.toggle('show');
 }
 
 function updateCodeSummary() {
-  const codes = [answers[1]||'?', answers[2]||'?', answers[3]||'?', answers[4]||'?'];
-  document.getElementById('codeSummary').textContent = `Your codes: ${codes.join(' + ')} - 1000 =?`;
-}
-
-function selectCell(cell) {
-  const choice = prompt('Enter: 1 for 🦀, 2 for 🪼, 3 for 🍴');
-  if (choice === '1') cell.textContent = '🦀';
-  if (choice === '2') cell.textContent = '🪼';
-  if (choice === '3') cell.textContent = '🍴';
+  const letters = [
+    answers[1]? 'S' : '?',
+    answers[2]? 'B' : '?',
+    answers[3]? 'S' : '?',
+    answers[4]? 'J' : '?'
+  ];
+  document.getElementById('codeSummary').textContent = `Letters: ${letters.join(' + ')} =?`;
 }
 </script>
 </body>
