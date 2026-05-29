@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SpongeBob in Egypt: Logic Escape</title>
+<title>SpongeBob in Egypt: Logic Escape v2</title>
 <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
   body {
@@ -13,8 +13,8 @@
     padding: 20px;
     color: #2c1810;
   }
- .container { max-width: 800px; margin: 0 auto; }
- .header {
+.container { max-width: 800px; margin: 0 auto; }
+.header {
     background: #ffeb3b;
     border: 4px solid #2c1810;
     border-radius: 15px;
@@ -24,7 +24,7 @@
     box-shadow: 0 4px 8px rgba(0,0,0,0.3);
   }
   h1 { font-size: 28px; margin-bottom: 10px; }
- .water-meter {
+.water-meter {
     background: #2c1810;
     border-radius: 20px;
     height: 30px;
@@ -32,7 +32,7 @@
     margin: 10px 0;
     border: 3px solid #2c1810;
   }
- .water-fill {
+.water-fill {
     background: linear-gradient(90deg, #2196f3, #4fc3f7);
     height: 100%;
     transition: width 0.5s;
@@ -42,7 +42,7 @@
     color: white;
     font-weight: bold;
   }
- .puzzle {
+.puzzle {
     background: #f5deb3;
     border: 4px solid #2c1810;
     border-radius: 15px;
@@ -50,16 +50,16 @@
     margin-bottom: 20px;
     display: none;
   }
- .puzzle.active { display: block; }
- .puzzle h2 { color: #8b4513; margin-bottom: 15px; font-size: 22px; }
- .story {
+.puzzle.active { display: block; }
+.puzzle h2 { color: #8b4513; margin-bottom: 15px; font-size: 22px; }
+.story {
     background: #fff8dc;
     padding: 12px;
     border-left: 4px solid #ff9800;
     margin: 10px 0;
     border-radius: 5px;
   }
- .input-group { margin: 15px 0; }
+.input-group { margin: 15px 0; }
   input[type="text"], input[type="number"] {
     width: 100%;
     padding: 12px;
@@ -67,6 +67,7 @@
     border: 3px solid #2c1810;
     border-radius: 8px;
     font-family: monospace;
+    text-transform: uppercase;
   }
   button {
     background: #ff9800;
@@ -81,9 +82,9 @@
   }
   button:hover { background: #ffa726; }
   button:disabled { background: #ccc; cursor: not-allowed; }
- .btn-hint { background: #4caf50; }
- .btn-solution { background: #f44336; color: white; }
- .hints,.solution {
+.btn-hint { background: #4caf50; }
+.btn-solution { background: #f44336; color: white; }
+.hints,.solution {
     background: #fff;
     border: 2px dashed #2c1810;
     padding: 15px;
@@ -91,16 +92,16 @@
     border-radius: 8px;
     display: none;
   }
- .hints.show,.solution.show { display: block; }
- .hint-item { margin: 8px 0; padding-left: 20px; }
- .grid {
+.hints.show,.solution.show { display: block; }
+.hint-item { margin: 8px 0; padding-left: 20px; }
+.grid {
     display: grid;
     grid-template-columns: repeat(3, 80px);
     gap: 10px;
     justify-content: center;
     margin: 15px 0;
   }
- .grid-cell {
+.grid-cell {
     width: 80px;
     height: 80px;
     border: 3px solid #2c1810;
@@ -112,8 +113,8 @@
     border-radius: 8px;
     cursor: pointer;
   }
- .grid-cell.selected { background: #ffeb3b; }
- .code-display {
+.grid-cell.selected { background: #ffeb3b; }
+.code-display {
     font-family: monospace;
     background: #2c1810;
     color: #4fc3f7;
@@ -122,10 +123,10 @@
     font-size: 18px;
     margin: 10px 0;
   }
- .nav { text-align: center; margin: 20px 0; }
- .success { color: #4caf50; font-weight: bold; font-size: 18px; }
- .error { color: #f44336; font-weight: bold; }
- .game-over {
+.nav { text-align: center; margin: 20px 0; }
+.success { color: #4caf50; font-weight: bold; font-size: 18px; }
+.error { color: #f44336; font-weight: bold; }
+.game-over {
     text-align: center;
     padding: 40px;
     background: #f44336;
@@ -133,7 +134,7 @@
     border-radius: 15px;
     display: none;
   }
- .win {
+.win {
     text-align: center;
     padding: 40px;
     background: #4caf50;
@@ -147,7 +148,7 @@
 <body>
 <div class="container">
   <div class="header">
-    <h1>🧽 SpongeBob in Egypt: Logic Escape 🏜️</h1>
+    <h1>🧽 SpongeBob in Egypt: Logic Escape v2 🏜️</h1>
     <p>SpongeBob is drying out! Solve 5 puzzles to get back to Bikini Bottom</p>
     <div class="water-meter">
       <div class="water-fill" id="waterFill">100% 💧</div>
@@ -155,50 +156,50 @@
     <p><a href="/mnt/data/CodeSheet-201912.pdf_-_CodeSheet.pdf" target="_blank">📄 View Code Sheet</a></p>
   </div>
 
-  <!-- Puzzle 1 -->
+  <!-- Puzzle 1 - UPDATED -->
   <div class="puzzle active" id="puzzle1">
     <h2>Puzzle 1: Hieroglyph Cipher</h2>
     <div class="story">SpongeBob found a wall of numbers in the pyramid. The ghost of King Crab says "Decode my name to proceed!"</div>
     <p><strong>Decode:</strong></p>
     <div class="code-display">19-16-15-14-7-5-2-15-2</div>
-    <p>Use A=1...Z=26. After decoding the word, take S=19, P=16 for the 4-digit lock code.</p>
+    <p>Use A=1...Z=26. Type the word you decoded.</p>
     <div class="input-group">
-      <input type="number" id="ans1" placeholder="Enter 4-digit code">
+      <input type="text" id="ans1" placeholder="Enter the word">
     </div>
-    <button onclick="checkAnswer(1, 1905)">Check Answer</button>
+    <button onclick="checkAnswer(1, 'SPONGEBOB')">Check Answer</button>
     <button class="btn-hint" onclick="showHints(1)">Show Hints</button>
     <button class="btn-solution" onclick="showSolution(1)">Show Solution</button>
     <div class="hints" id="hints1">
       <div class="hint-item">💡 Hint 1: 19=S, 16=P, 15=O, 14=N...</div>
-      <div class="hint-item">💡 Hint 2: The word is SPONGEBOB</div>
-      <div class="hint-item">💡 Hint 3: Take S=19, P=16 → 1905</div>
+      <div class="hint-item">💡 Hint 2: Keep going: 7=G, 5=E, 2=B, 15=O, 2=B</div>
+      <div class="hint-item">💡 Hint 3: The word is SPONGEBOB</div>
     </div>
     <div class="solution" id="solution1">
-      <strong>Solution:</strong> 19=S, 16=P, 15=O, 14=N, 7=G, 5=E, 2=B, 15=O, 2=B → SPONGEBOB. Code = <strong>1905</strong>
+      <strong>Solution:</strong> 19=S, 16=P, 15=O, 14=N, 7=G, 5=E, 2=B, 15=O, 2=B → <strong>SPONGEBOB</strong>
     </div>
     <div id="result1"></div>
   </div>
 
-  <!-- Puzzle 2 -->
+  <!-- Puzzle 2 - UPDATED -->
   <div class="puzzle" id="puzzle2">
     <h2>Puzzle 2: Sarcophagus NATO Lock</h2>
-    <div class="story">The sarcophagus only opens with a military call sign. A mummy whispers the code...</div>
+    <div class="story">The sarcophagus only opens with a military call sign. A mummy whispers the full code...</div>
     <p><strong>Decode:</strong></p>
     <div class="code-display">BRAVO - INDIA - KILO - INDIA - NOVEMBER - INDIA</div>
-    <p>Take first letter of each, convert to numbers A=1...Z=26, use first 4 digits.</p>
+    <p>Take first letter of each, convert to numbers A=1...Z=26, enter all digits together.</p>
     <div class="input-group">
-      <input type="number" id="ans2" placeholder="Enter 4-digit code">
+      <input type="number" id="ans2" placeholder="Enter full number code">
     </div>
-    <button onclick="checkAnswer(2, 2911)">Check Answer</button>
+    <button onclick="checkAnswer(2, 29119149)">Check Answer</button>
     <button class="btn-hint" onclick="showHints(2)">Show Hints</button>
     <button class="btn-solution" onclick="showSolution(2)">Show Solution</button>
     <div class="hints" id="hints2">
       <div class="hint-item">💡 Hint 1: B-I-K-I-N-I spells BIKINI</div>
-      <div class="hint-item">💡 Hint 2: B=2, I=9, K=11</div>
-      <div class="hint-item">💡 Hint 3: First 4 digits of 2-9-11-9 = 2911</div>
+      <div class="hint-item">💡 Hint 2: B=2, I=9, K=11, I=9, N=14, I=9</div>
+      <div class="hint-item">💡 Hint 3: Put them together: 2-9-11-9-14-9 = 29119149</div>
     </div>
     <div class="solution" id="solution2">
-      <strong>Solution:</strong> BRAVO=B, INDIA=I, KILO=K, INDIA=I, NOVEMBER=N, INDIA=I → BIKINI → 2,9,11,9 → <strong>2911</strong>
+      <strong>Solution:</strong> BRAVO=B=2, INDIA=I=9, KILO=K=11, INDIA=I=9, NOVEMBER=N=14, INDIA=I=9 → <strong>29119149</strong>
     </div>
     <div id="result2"></div>
   </div>
@@ -245,11 +246,11 @@
     <button class="btn-solution" onclick="showSolution(4)">Show Solution</button>
     <div class="hints" id="hints4">
       <div class="hint-item">💡 Hint 1: Row 3 has 🦀 and 🍴</div>
-      <div class="hint-item">💡 Hint 2: Missing piece must be 🪼 or check columns</div>
-      <div class="hint-item">💡 Hint 3: Column 3 has 🍴 and 🦀, so answer is 🪼=2. Wait—actually it's 🍴=3</div>
+      <div class="hint-item">💡 Hint 2: Column 3 has 🍴 and 🦀</div>
+      <div class="hint-item">💡 Hint 3: Missing piece is 🍴 = 3</div>
     </div>
     <div class="solution" id="solution4">
-      <strong>Solution:</strong> Row 3 needs 🪼 but col 3 needs 🍴. Correct is 🍴 = <strong>3</strong>
+      <strong>Solution:</strong> Only 🍴 fits → <strong>3</strong>
     </div>
     <div id="result4"></div>
   </div>
@@ -259,20 +260,21 @@
     <h2>Puzzle 5: Pharaoh's Final Riddle - Meta Puzzle</h2>
     <div class="story">The exit portal needs energy from all 4 codes combined!</div>
     <p><strong>Formula:</strong> Add all 4 puzzle codes, then subtract 1000</p>
+    <p><em>Note: Puzzle 1 word = 0 for math, or use 1905 if you want. For this version: 0 + 29119149 + 1234 + 3 - 1000 = 29119386</em></p>
     <div class="code-display" id="codeSummary">Your codes:? +? +? +? - 1000 =?</div>
     <div class="input-group">
       <input type="number" id="ans5" placeholder="Enter final exit code">
     </div>
-    <button onclick="checkAnswer(5, 5053)">Check Answer</button>
+    <button onclick="checkAnswer(5, 29119386)">Check Answer</button>
     <button class="btn-hint" onclick="showHints(5)">Show Hints</button>
     <button class="btn-solution" onclick="showSolution(5)">Show Solution</button>
     <div class="hints" id="hints5">
-      <div class="hint-item">💡 Hint 1: 1905 + 2911 = 4816</div>
-      <div class="hint-item">💡 Hint 2: 4816 + 1234 + 3 = 6053</div>
-      <div class="hint-item">💡 Hint 3: 6053 - 1000 = 5053</div>
+      <div class="hint-item">💡 Hint 1: SPONGEBOB = 0 for this puzzle</div>
+      <div class="hint-item">💡 Hint 2: 0 + 29119149 + 1234 + 3 = 29120386</div>
+      <div class="hint-item">💡 Hint 3: 29120386 - 1000 = 29119386</div>
     </div>
     <div class="solution" id="solution5">
-      <strong>Solution:</strong> 1905 + 2911 + 1234 + 3 = 6053. 6053 - 1000 = <strong>5053</strong>
+      <strong>Solution:</strong> 0 + 29119149 + 1234 + 3 - 1000 = <strong>29119386</strong>
     </div>
     <div id="result5"></div>
   </div>
@@ -286,7 +288,7 @@
   <div class="win" id="winScreen">
     <h2>🎉 YOU ESCAPED! 🎉</h2>
     <p>SpongeBob made it back to Bikini Bottom!</p>
-    <p>Final Code: 5053</p>
+    <p>Final Code: 29119386</p>
     <button onclick="location.reload()">Play Again</button>
   </div>
 </div>
@@ -311,8 +313,27 @@ function updateWater(amount) {
 function checkAnswer(puzzleNum, correct) {
   const input = document.getElementById('ans' + puzzleNum);
   const result = document.getElementById('result' + puzzleNum);
-  const userAns = parseInt(input.value);
+  let userAns = input.value.trim().toUpperCase();
 
+  if (puzzleNum === 1) {
+    if (userAns === correct) {
+      result.innerHTML = '<p class="success">✅ Correct! Moving to next puzzle...</p>';
+      answers[puzzleNum] = 0; // For meta puzzle calc
+      input.disabled = true;
+      updateCodeSummary();
+      setTimeout(() => {
+        document.getElementById('puzzle' + puzzleNum).classList.remove('active');
+        document.getElementById('puzzle' + (puzzleNum + 1)).classList.add('active');
+        currentPuzzle = puzzleNum + 1;
+      }, 1500);
+    } else {
+      result.innerHTML = '<p class="error">❌ Wrong! -10% water</p>';
+      updateWater(-10);
+    }
+    return;
+  }
+
+  userAns = parseInt(userAns);
   if (userAns === correct) {
     result.innerHTML = '<p class="success">✅ Correct! Moving to next puzzle...</p>';
     answers[puzzleNum] = correct;
