@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SpongeBob in Egypt: Logic Escape v3</title>
+<title>SpongeBob in Egypt: Logic Escape v4</title>
 <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
   body {
@@ -190,7 +190,6 @@
     border-radius: 15px;
     display: none;
   }
-  a { color: #2196f3; font-weight: bold; }
 </style>
 </head>
 <body>
@@ -201,15 +200,14 @@
       <polygon points="100,5 60,55 140,55" fill="#cd853f" stroke="#8b4513" stroke-width="2"/>
       <text x="100" y="45" text-anchor="middle" font-size="20">🏺</text>
     </svg>
-    <h1>🧽 SpongeBob in Egypt: Logic Escape v3 🏜️</h1>
+    <h1>🧽 SpongeBob in Egypt: Logic Escape v4 🏜️</h1>
     <p>SpongeBob is drying out! Solve 5 puzzles to get back to Bikini Bottom</p>
     <div class="water-meter">
       <div class="water-fill" id="waterFill">100% 💧</div>
     </div>
-    <p><a href="/mnt/data/CodeSheet-201912.pdf_-_CodeSheet.pdf" target="_blank">📄 View Code Sheet</a></p>
   </div>
 
-  <!-- Puzzle 1: UPDATED - Answer is SPONGEBOB -->
+  <!-- Puzzle 1 -->
   <div class="puzzle active" id="puzzle1">
     <h2>Puzzle 1: Hieroglyph Cipher 🗿</h2>
     <div class="story">SpongeBob found a wall of numbers in the pyramid. The ghost of King Crab says "Decode my name to proceed!"</div>
@@ -233,7 +231,7 @@
     <div id="result1"></div>
   </div>
 
-  <!-- Puzzle 2: UPDATED - Answer is 29119149 -->
+  <!-- Puzzle 2 -->
   <div class="puzzle" id="puzzle2">
     <h2>Puzzle 2: Sarcophagus NATO Lock ⚔️</h2>
     <div class="story">The sarcophagus only opens with a military call sign. A mummy whispers the full code...</div>
@@ -257,7 +255,7 @@
     <div id="result2"></div>
   </div>
 
-  <!-- Puzzle 3: UPDATED - Spaced out Morse, Answer is SEA WATER -->
+  <!-- Puzzle 3 -->
   <div class="puzzle" id="puzzle3">
     <h2>Puzzle 3: Tomb Tap Code 📡</h2>
     <div class="story">Ancient drums tap out a message. SpongeBob desperately needs this!</div>
@@ -291,7 +289,7 @@
     <div id="result3"></div>
   </div>
 
-  <!-- Puzzle 4: UPDATED - Answer is 2 for jellyfish -->
+  <!-- Puzzle 4 -->
   <div class="puzzle" id="puzzle4">
     <h2>Puzzle 4: Anubis Pattern Lock 🪼</h2>
     <div class="story">Each row/column needs one of each: 🦀 crab=1, 🪼 jellyfish=2, 🍴 spatula=3. Find the missing piece!</div>
@@ -318,25 +316,31 @@
     <div id="result4"></div>
   </div>
 
-  <!-- Puzzle 5: NEW - Word puzzle using first letters -->
+  <!-- Puzzle 5: NEW - Makes actual sense now -->
   <div class="puzzle" id="puzzle5">
-    <h2>Puzzle 5: Pharaoh's Word Lock 👑</h2>
-    <div class="story">The final door needs a 4-letter word. Use the FIRST LETTER of each previous answer!</div>
-    <p><strong>Riddle:</strong> Take the first letter from Puzzle 1, 2, 3, and 4. Unscramble them to spell a word meaning "the person in charge".</p>
-    <div class="code-display" id="codeSummary">Letters: S + B + S + J =?</div>
-    <div class="input-group">
-      <input type="text" id="ans5" placeholder="Enter 4-letter word">
+    <h2>Puzzle 5: Pharaoh's Final Riddle 👑</h2>
+    <div class="story">The final door needs ONE word that connects all your answers. Think about SpongeBob's world!</div>
+    <p><strong>Riddle:</strong></p>
+    <div class="story">
+      Puzzle 1: SPONGEBOB lives in...<br>
+      Puzzle 2: BIKINI...<br>
+      Puzzle 3: SEA WATER is where he swims<br>
+      Puzzle 4: JELLYFISH are his friends there<br><br>
+      What single location ties them ALL together?
     </div>
-    <button onclick="checkAnswer(5, 'BOSS')">Check Answer</button>
+    <div class="input-group">
+      <input type="text" id="ans5" placeholder="Enter the location">
+    </div>
+    <button onclick="checkAnswer(5, 'BIKINI BOTTOM')">Check Answer</button>
     <button class="btn-hint" onclick="showHints(5)">Show Hints</button>
     <button class="btn-solution" onclick="showSolution(5)">Show Solution</button>
     <div class="hints" id="hints5">
-      <div class="hint-item">💡 Hint 1: S from SPONGEBOB, B from BIKINI, S from SEA, J from JELLYFISH</div>
-      <div class="hint-item">💡 Hint 2: You have S, B, S, J. Rearrange them.</div>
-      <div class="hint-item">💡 Hint 3: The boss of the Krusty Krab is... BOSS</div>
+      <div class="hint-item">💡 Hint 1: SPONGEBOB lives there</div>
+      <div class="hint-item">💡 Hint 2: It starts with BIKINI...</div>
+      <div class="hint-item">💡 Hint 3: It's at the BOTTOM of the sea. BIKINI BOTTOM</div>
     </div>
     <div class="solution" id="solution5">
-      <strong>Solution:</strong> S + B + S + J unscrambles to <strong>BOSS</strong>
+      <strong>Solution:</strong> SPONGEBOB lives in BIKINI BOTTOM. BIKINI + sea WATER + JELLYFISH friends = <strong>BIKINI BOTTOM</strong>
     </div>
     <div id="result5"></div>
   </div>
@@ -350,7 +354,7 @@
   <div class="win" id="winScreen">
     <h2>🎉 YOU ESCAPED! 🎉</h2>
     <p>SpongeBob made it back to Bikini Bottom!</p>
-    <p>Final Word: BOSS</p>
+    <p>Final Answer: BIKINI BOTTOM</p>
     <button onclick="location.reload()">Play Again</button>
   </div>
 </div>
@@ -358,7 +362,6 @@
 <script>
 let water = 100;
 let currentPuzzle = 1;
-let answers = {1: null, 2: null, 3: null, 4: null, 5: null};
 
 function updateWater(amount) {
   water += amount;
@@ -378,11 +381,14 @@ function checkAnswer(puzzleNum, correct) {
   let userAns = input.value.trim().toUpperCase();
 
   if (puzzleNum === 1 || puzzleNum === 3 || puzzleNum === 5) {
+    // Handle "BIKINI BOTTOM" with or without space
+    if (puzzleNum === 5) {
+      userAns = userAns.replace(/\s+/g, ' ');
+      if (userAns === 'BIKINI BOTTOM' || userAns === 'BIKINIBOTTOM') userAns = correct;
+    }
     if (userAns === correct) {
       result.innerHTML = '<p class="success">✅ Correct! Moving to next puzzle...</p>';
-      answers[puzzleNum] = correct;
       input.disabled = true;
-      updateCodeSummary();
       setTimeout(() => {
         if (puzzleNum < 5) {
           document.getElementById('puzzle' + puzzleNum).classList.remove('active');
@@ -403,9 +409,7 @@ function checkAnswer(puzzleNum, correct) {
   userAns = parseInt(userAns);
   if (userAns === correct) {
     result.innerHTML = '<p class="success">✅ Correct! Moving to next puzzle...</p>';
-    answers[puzzleNum] = correct;
     input.disabled = true;
-    updateCodeSummary();
     setTimeout(() => {
       if (puzzleNum < 5) {
         document.getElementById('puzzle' + puzzleNum).classList.remove('active');
@@ -423,23 +427,11 @@ function checkAnswer(puzzleNum, correct) {
 }
 
 function showHints(num) {
-  const hints = document.getElementById('hints' + num);
-  hints.classList.toggle('show');
+  document.getElementById('hints' + num).classList.toggle('show');
 }
 
 function showSolution(num) {
-  const sol = document.getElementById('solution' + num);
-  sol.classList.toggle('show');
-}
-
-function updateCodeSummary() {
-  const letters = [
-    answers[1]? 'S' : '?',
-    answers[2]? 'B' : '?',
-    answers[3]? 'S' : '?',
-    answers[4]? 'J' : '?'
-  ];
-  document.getElementById('codeSummary').textContent = `Letters: ${letters.join(' + ')} =?`;
+  document.getElementById('solution' + num).classList.toggle('show');
 }
 </script>
 </body>
